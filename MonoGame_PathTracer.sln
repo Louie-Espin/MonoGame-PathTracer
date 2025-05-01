@@ -9,6 +9,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PathTracer.WindowsDX", "Pat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PathTracer.DesktopGL", "PathTracer.DesktopGL\PathTracer.DesktopGL.csproj", "{A3551331-E30C-4008-9699-7207A5B27701}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Monogame.ImGuiNet", "MonoGame.ImGuiNet\Monogame.ImGuiNet.csproj", "{5CA1D1F3-4A3A-4283-A4F8-B2FC5E61FF9E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "packages", "packages", "{C9A0F75D-E497-42B7-A4CE-D59286C6C9B8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,9 +27,16 @@ Global
 		{A3551331-E30C-4008-9699-7207A5B27701}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A3551331-E30C-4008-9699-7207A5B27701}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A3551331-E30C-4008-9699-7207A5B27701}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5CA1D1F3-4A3A-4283-A4F8-B2FC5E61FF9E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5CA1D1F3-4A3A-4283-A4F8-B2FC5E61FF9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5CA1D1F3-4A3A-4283-A4F8-B2FC5E61FF9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5CA1D1F3-4A3A-4283-A4F8-B2FC5E61FF9E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{5CA1D1F3-4A3A-4283-A4F8-B2FC5E61FF9E} = {C9A0F75D-E497-42B7-A4CE-D59286C6C9B8}
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		PathTracer.Core\PathTracer.Core.projitems*{3915ea66-5b23-483d-b619-5aba5572d5cf}*SharedItemsImports = 5

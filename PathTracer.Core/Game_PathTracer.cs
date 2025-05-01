@@ -4,11 +4,14 @@ using Microsoft.Xna.Framework.Input;
 using System;
 using System.Diagnostics;
 using static System.Math;
+using MonoGame.ImGuiNet;
+using ImGuiNET;
 
 using PathTracer.Core.Source.Camera;
 using PathTracer.Core.Source.Control;
 using PathTracer.Core.Source.Model;
 using PathTracer.Core.Source.RenderPass;
+using PathTracer.Core.Source.GUI;
 
 namespace PathTracer.Core {
 
@@ -49,7 +52,7 @@ namespace PathTracer.Core {
 
 		/* TOGGLE PATH TRACE DENOISE & RENDER MODE */
 		private KeyToggle<bool> _toggleDenoise = new(Keys.D, false);
-		private KeyToggle<bool> _toggleView = new(Keys.V, false);
+		private KeyToggle<bool> _toggleView = new(Keys.V, true);
 
 		/* PATH TRACE SAMPLES PER PIXEL & RAY BOUNCE LIMIT */
 		private KeyPair _SSP = new((Keys.Left, Keys.Right), value: 50, step: 1, bounds: (1, 500));
@@ -60,6 +63,7 @@ namespace PathTracer.Core {
 
 		/* PATH TRACE DATA */
 		ModelList _spheres = new ModelList();
+		SettingsWindow _settingsWindow;
 
 		public Game_PathTracer() {
 			_graphics = new GraphicsDeviceManager(this);
@@ -75,6 +79,9 @@ namespace PathTracer.Core {
 			_graphics.PreferredBackBufferWidth = 1280;
 			_graphics.PreferredBackBufferHeight = 720;
 			_graphics.ApplyChanges();
+
+			/* Settings Window (GUI) */
+			_settingsWindow = new SettingsWindow(this);
 
 			/* Main Camera */
 			_camera = new PathTraceCamera(
@@ -129,7 +136,8 @@ namespace PathTracer.Core {
 		protected override void LoadContent() {
 			_spriteBatch = new SpriteBatch(GraphicsDevice);
 
-			// TODO: use this.Content to load your game content here
+			_settingsWindow.onLoad();
+
 			_font = Content.Load<SpriteFont>("fonts/font");
 			_sphere = Content.Load<Model>("models/sphere/sphere");
 			_ptEffect = Content.Load<Effect>("shaders/path-tracer");
@@ -206,7 +214,12 @@ namespace PathTracer.Core {
 			/* TODO: Replace with DrawUI */
 			_spriteBatch.Draw(
 				(_toggleView.Value) ? _unlitTarget : _target,
-				new Rectangle(10, 10, GraphicsDevice.Viewport.Width / 4, GraphicsDevice.Viewport.Height / 4),
+				new Rectangle(
+					25,
+					GraphicsDevice.Viewport.Bounds.Bottom - (GraphicsDevice.Viewport.Height / 4) - 25,
+					GraphicsDevice.Viewport.Width / 4,
+					GraphicsDevice.Viewport.Height / 4
+				),
 				Color.White
 			);
 			_debug(true);
@@ -221,6 +234,8 @@ namespace PathTracer.Core {
 			_totalFrames++;
 
 			base.Draw(gameTime);
+
+			_settingsWindow.Draw(gameTime);
 		}
 
 		private Texture2D UnlitPass(RenderTarget2D target) {

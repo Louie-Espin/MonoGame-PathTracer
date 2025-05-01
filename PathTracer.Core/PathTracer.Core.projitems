@@ -16,6 +16,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Source\Control\ControlHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Source\Control\KeyControl.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Source\Control\MouseControl.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)source\gui\SettingsWindow.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Source\Model\Material.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Source\Model\ModelList.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Source\Model\Sphere.cs" />
@@ -23,10 +24,19 @@
     <Compile Include="$(MSBuildThisFileDirectory)Source\RenderPass\RenderPass.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="$(MSBuildThisFileDirectory)Content\" />
-  </ItemGroup>
-  <ItemGroup>
     <MonoGameContentReference Include="$(MSBuildThisFileDirectory)Content\Content.mgcb" />
     <None Include="$(MSBuildThisFileDirectory)Content\Content.mgcb" />
+    <None Include="$(MSBuildThisFileDirectory)Content\fonts\font.spritefont" />
+    <None Include="$(MSBuildThisFileDirectory)Content\models\box\box.fbx" />
+    <None Include="$(MSBuildThisFileDirectory)Content\models\sphere\sphere.fbx" />
+    <None Include="$(MSBuildThisFileDirectory)Content\shaders\denoise.fx" />
+    <None Include="$(MSBuildThisFileDirectory)Content\shaders\path-tracer.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="$(MSBuildThisFileDirectory)Content\models\box\texture.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Content\models\sphere\texture.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)Source\GUI\" />
   </ItemGroup>
 </Project>
