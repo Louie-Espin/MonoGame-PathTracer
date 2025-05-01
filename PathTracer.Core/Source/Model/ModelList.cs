@@ -39,6 +39,8 @@ public class ModelList {
 		set { _selected = (_selected + 1) % 5; }
 	}
 
+	public int Size => NUM_SPHERES;
+
 	public void setParams(ref Effect ptEffect) {
 		/* Setting up Effects */
 		_positionParam  = ptEffect.Parameters["SPHERE_POS"];
@@ -50,6 +52,8 @@ public class ModelList {
 		_glossParam     = ptEffect.Parameters["SPHERE_GLOSS"];
 		_liteParam      = ptEffect.Parameters["SPHERE_LITE"];
 	}
+
+	public ref Sphere[] Spheres => ref _spheres;
 
 	/* FIXME: Not DRY. Find a way to get generic Sphere properties */
 	public void SetData(ref Effect ptEffect, SphereParam param) {

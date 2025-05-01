@@ -1,15 +1,17 @@
 ﻿using Microsoft.Xna.Framework;
+using NumVector3 = System.Numerics.Vector3;
+using NumVector4 = System.Numerics.Vector4;
 using System;
 
 namespace PathTracer.Core.Source.Model; 
 public class Sphere {
 
-	private Vector3 position;
+	private NumVector3 position;
 	private float radius;
 	private Material material;
 
 	/* Constructs a Sphere */
-	public Sphere(Vector3 position, float radius, Vector4 diffuseColor, Vector4 specularColor, float specular, float gloss) {
+	public Sphere(NumVector3 position, float radius, NumVector4 diffuseColor, NumVector4 specularColor, float specular, float gloss) {
 		Position = position;
 		this.radius = radius;
 		material = new Material();
@@ -23,7 +25,7 @@ public class Sphere {
 	}
 
 	/* Constructs a Sphere, assumes SpecularColor is White */
-	public Sphere(Vector3 position, float radius, Vector4 diffuseColor, float specular, float gloss) {
+	public Sphere(NumVector3 position, float radius, NumVector4 diffuseColor, float specular, float gloss) {
 		Position = position;
 		this.radius = radius;
 		material = new Material();
@@ -37,7 +39,7 @@ public class Sphere {
 	}
 
 	/* Constructs light-emitting Sphere */
-	public Sphere(Vector3 position, float radius, Vector3 lightColor, float lightIntensity) {
+	public Sphere(NumVector3 position, float radius, NumVector3 lightColor, float lightIntensity) {
 		Position = position;
 		this.radius = radius;
 		material = new Material();
@@ -50,24 +52,24 @@ public class Sphere {
 		Gloss = 0;
 	}
 
-	public Vector3 Position {
+	public NumVector3 Position {
 		get => position;
 		set { position = value; }
 	}
 
 	public float Radius => radius;
 
-	public Vector4 DiffuseColor {
+	public NumVector4 DiffuseColor {
 		get { return material.color; }
 		set { material.color = value; }
 	}
 
-	public Vector3 LightColor {
+	public NumVector3 LightColor {
 		get => material.lightColor;
 		set { material.lightColor = value; }
 	}
 
-	public Vector4 SpecularColor {
+	public NumVector4 SpecularColor {
 		get => material.specularColor;
 		set { material.specularColor = value; }
 	}
@@ -77,7 +79,7 @@ public class Sphere {
 		set { material.lightIntensity = value; }
 	}
 
-	public float Specular {  
+    public float Specular {  
 		get => material.specularIntensity;
 		set { material.specularIntensity = Math.Clamp(value, 0, 1); }
 	}

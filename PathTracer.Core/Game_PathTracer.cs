@@ -42,7 +42,7 @@ namespace PathTracer.Core {
 		// private PathTracePass _pathTrace; // FIXME
 
 		private ControlHandler _controlHandler = new ControlHandler();
-		private MouseDrag _cameraRotate = new(new(0.5f, 0.7f), MouseButtonType.LEFT, value: new(0, 0));
+		private MouseDrag _cameraRotate = new(new(0.5f, 0.7f), MouseButtonType.RIGHT, value: new(0, 0));
 		private MouseDrag _cameraXY = new(new(0.05f, 0.07f), MouseButtonType.RIGHT, value: new(0, 0));
 		private MouseDrag _cameraZ = new(new(0.05f, 0.07f), MouseButtonType.WHEEL, value: new(0, -10.0f));// TODO: MIN-MAX
 
@@ -81,7 +81,7 @@ namespace PathTracer.Core {
 			_graphics.ApplyChanges();
 
 			/* Settings Window (GUI) */
-			_settingsWindow = new SettingsWindow(this);
+			_settingsWindow = new SettingsWindow(this, _spheres.Size);
 
 			/* Main Camera */
 			_camera = new PathTraceCamera(
@@ -235,7 +235,7 @@ namespace PathTracer.Core {
 
 			base.Draw(gameTime);
 
-			_settingsWindow.Draw(gameTime);
+			_settingsWindow.Draw(gameTime, models: ref _spheres);
 		}
 
 		private Texture2D UnlitPass(RenderTarget2D target) {
@@ -269,7 +269,7 @@ namespace PathTracer.Core {
 			);
 			_ptEffect.Parameters["_viewportSize"].SetValue(_camera.ViewportDimensions);
 			_ptEffect.Parameters["_focalLength"].SetValue(_camera.Clip.Near);
-			_ptEffect.Parameters["_frame"].SetValue((int)_accumFrames);
+			_ptEffect.Parameters["_frame"].SetValue((int)_totalFrames);
 			_ptEffect.Parameters["_screenX"].SetValue(GraphicsDevice.Viewport.Width);
 			_ptEffect.Parameters["_screenY"].SetValue(GraphicsDevice.Viewport.Height);
 			_ptEffect.Parameters["SPP"].SetValue((int)_SSP.Value);
