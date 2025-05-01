@@ -1,0 +1,35 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35707.178
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "PathTracer.Core", "PathTracer.Core\PathTracer.Core.shproj", "{A0CDBD0E-3A41-42B7-9425-A838BC2C7383}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PathTracer.WindowsDX", "PathTracer.WindowsDX\PathTracer.WindowsDX.csproj", "{3915EA66-5B23-483D-B619-5ABA5572D5CF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PathTracer.DesktopGL", "PathTracer.DesktopGL\PathTracer.DesktopGL.csproj", "{A3551331-E30C-4008-9699-7207A5B27701}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3915EA66-5B23-483D-B619-5ABA5572D5CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3915EA66-5B23-483D-B619-5ABA5572D5CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3915EA66-5B23-483D-B619-5ABA5572D5CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3915EA66-5B23-483D-B619-5ABA5572D5CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3551331-E30C-4008-9699-7207A5B27701}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3551331-E30C-4008-9699-7207A5B27701}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3551331-E30C-4008-9699-7207A5B27701}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3551331-E30C-4008-9699-7207A5B27701}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		PathTracer.Core\PathTracer.Core.projitems*{3915ea66-5b23-483d-b619-5aba5572d5cf}*SharedItemsImports = 5
+		PathTracer.Core\PathTracer.Core.projitems*{a0cdbd0e-3a41-42b7-9425-a838bc2c7383}*SharedItemsImports = 13
+		PathTracer.Core\PathTracer.Core.projitems*{a3551331-e30c-4008-9699-7207a5b27701}*SharedItemsImports = 5
+	EndGlobalSection
+EndGlobal

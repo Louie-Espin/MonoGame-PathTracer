@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>6efba8a9-a407-4029-bdd0-651d22a87386</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>PathTracer.Core</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Game_PathTracer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)source\camera\AbstractCamera.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Source\Camera\ArcballCamera.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)source\camera\PathTraceCamera.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Source\Control\ControlHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Source\Control\KeyControl.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Source\Control\MouseControl.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Source\Model\Material.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Source\Model\ModelList.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Source\Model\Sphere.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Source\RenderPass\PathTracePass.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Source\RenderPass\RenderPass.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)Content\" />
+  </ItemGroup>
+  <ItemGroup>
+    <MonoGameContentReference Include="$(MSBuildThisFileDirectory)Content\Content.mgcb" />
+    <None Include="$(MSBuildThisFileDirectory)Content\Content.mgcb" />
+  </ItemGroup>
+</Project>
