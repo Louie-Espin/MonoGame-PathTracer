@@ -35,6 +35,7 @@
   <ItemGroup>
     <Content Include="$(MSBuildThisFileDirectory)Content\models\box\texture.png" />
     <Content Include="$(MSBuildThisFileDirectory)Content\models\sphere\texture.png" />
+    <Content Include="$(MSBuildThisFileDirectory)NOTES.md" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)Source\GUI\" />

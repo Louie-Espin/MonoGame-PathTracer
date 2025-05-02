@@ -81,7 +81,7 @@ namespace PathTracer.Core {
 			_graphics.ApplyChanges();
 
 			/* Settings Window (GUI) */
-			_settingsWindow = new SettingsWindow(this, _spheres.Size);
+			_settingsWindow = new SettingsWindow(this, GraphicsDevice, _spheres.Size);
 
 			/* Main Camera */
 			_camera = new PathTraceCamera(
