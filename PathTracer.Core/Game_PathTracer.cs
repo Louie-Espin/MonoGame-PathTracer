@@ -2,7 +2,6 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
-using System.Diagnostics;
 using static System.Math;
 
 using PathTracer.Core.Source.Camera;
@@ -21,13 +20,9 @@ namespace PathTracer.Core {
 
 		private RenderTarget2D _target;
 		private RenderTarget2D _unlitTarget;
-
 		private Texture2D _renderCurr;
 		private Texture2D _renderPrev;
-		private Color[] _textureData;
-
-		private long _totalFrames = 0;
-		private long _accumFrames = 0;
+		private Color[]   _textureData;
 
 		private Effect _ptEffect;
 		private Effect _accumEffect;
@@ -35,17 +30,15 @@ namespace PathTracer.Core {
 		private Model _sphere;
 		private PathTraceCamera _camera;
 
-		// private PathTracePass _pathTrace; // FIXME
+		// private PathTracePass _pathTrace; // TODO
 
-		private ControlHandler _controlHandler = new ControlHandler();
-		private MouseDrag _cameraRotate = new(new(0.5f, 0.7f), MouseButtonType.RIGHT, value: new(0, 0));
-		private MouseDrag _cameraXY = new(new(0.05f, 0.07f), MouseButtonType.RIGHT, value: new(0, 0));
-		private MouseDrag _cameraZ = new(new(0.05f, 0.07f), MouseButtonType.WHEEL, value: new(0, -10.0f));// TODO: MIN-MAX
-		private KeyToggle<Action<ArcballCamera>> _cameraReset = new(Keys.S, (ArcballCamera c) => c.Reset());
-		private KeyToggle<Action<MouseControl<Vector2>>> _transformReset = new(Keys.S, (MouseControl<Vector2> t) => t.Value = Vector2.Zero);
+		private ControlHandler _controlHandler = new();
+		private MouseDrag _cameraRot = new(new(0.5f, 0.7f),   MouseButtonType.RIGHT, value: new(0, 0));
+		private MouseDrag _cameraXY =  new(new(0.05f, 0.07f), MouseButtonType.RIGHT, value: new(0, 0));
+		private MouseDrag _cameraZ =   new(new(0.05f, 0.07f), MouseButtonType.WHEEL, value: new(0, -10)); // TODO: BOUNDS
 
-		/* PATH TRACE DATA */
-		ModelList _spheres = new ModelList();
+		/* SCENE DATA */
+		ModelList _spheres = new();
 
 		/* GUI COMPONENTS */
 		private MainWindow _GUI;
@@ -69,7 +62,7 @@ namespace PathTracer.Core {
 			_graphics.ApplyChanges();
 
 			/* Initialize GUI Windows */
-			_GUI = new MainWindow(this, GraphicsDevice);
+			_GUI = new (this, GraphicsDevice);
 			_sceneEdit = new (_spheres.Size);
 			_settings = new ();
 			_profiler = new ();
@@ -150,8 +143,8 @@ namespace PathTracer.Core {
 				Exit();
 
 			/* Poll Camera Transformation */
-			_controlHandler.PollMouseDrag(_cameraRotate, (Vector2 v) => _camera.Rotate(new(v, 0)));
-			// _controlHandler.PollMouseDrag(_cameraXY,     (Vector2 v) => _camera.Translate(new(v, _camera.Offset.M43)));
+			_controlHandler.PollMouseDrag(_cameraRot, (Vector2 v) => _camera.Rotate(new(v, 0)));
+			// _controlHandler.PollMouseDrag(_cameraXY, (Vector2 v) => _camera.Translate(new(v, _camera.Offset.M43)));
 			_controlHandler.PollMouseDrag(_cameraZ, (Vector2 v) => _camera.Translate(new(_camera.Offset.M41, _camera.Offset.M42, v.Y)));
 
 			_controlHandler.MousePrevious(Mouse.GetState());
@@ -160,16 +153,12 @@ namespace PathTracer.Core {
 		}
 
 		protected override void Draw(GameTime gameTime) {
-
-			Debug.WriteLine($"FRAMETIME: {gameTime.ElapsedGameTime.TotalMilliseconds}");
-			Debug.WriteLine($"frame: {_totalFrames}");
-
 			/* Store the previous render in _RenderPrev */
-			_renderCurr.GetData(_textureData);
+			_renderCurr.GetData(_textureData); // FIXME: Redundant if _textureData already holds prevRender data
 			_renderPrev.SetData(_textureData);
 
 			/* First (Unlit) Pass, saved to renderUnlit */
-			_unlitTarget = (RenderTarget2D)UnlitPass(_unlitTarget);
+			_unlitTarget = (RenderTarget2D) UnlitPass(_unlitTarget);
 
 			/* Path Trace Pass */
 			_renderCurr = PathTracePass(_target);
@@ -182,32 +171,26 @@ namespace PathTracer.Core {
 				SpriteSortMode.Deferred, BlendState.AlphaBlend,
 				rasterizerState: RasterizerState.CullNone, effect: null
 			);
-			/* TODO: Replace with DrawMain */
-			_spriteBatch.Draw(
+			_spriteBatch.Draw( /* TODO: Replace with DrawMain */
 				(_settings.View) ? _target : _unlitTarget,
 				new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height),
 				Color.White
 			);
-			/* TODO: Replace with DrawUI */
-			_spriteBatch.Draw(
+			_spriteBatch.Draw( /* TODO: Replace with DrawUI */
 				(_settings.View) ? _unlitTarget : _target,
 				new Rectangle(
 					x: GraphicsDevice.Viewport.Bounds.Right - (GraphicsDevice.Viewport.Width / 4) - 25,
 					y: GraphicsDevice.Viewport.Bounds.Bottom - (GraphicsDevice.Viewport.Height / 4) - 25,
-					width: GraphicsDevice.Viewport.Width / 4,
+					width:  GraphicsDevice.Viewport.Width / 4,
 					height: GraphicsDevice.Viewport.Height / 4
 				),
 				Color.White
 			);
-			_debug(true);
 			_spriteBatch.End();
 
 			/* Store the current render in _RenderCurr */
 			GraphicsDevice.GetBackBufferData(_textureData);
 			_renderCurr.SetData(_textureData);
-
-			/* Update total # of frames */
-			_totalFrames++;
 
 			base.Draw(gameTime);
 
@@ -249,7 +232,7 @@ namespace PathTracer.Core {
 			);
 			_ptEffect.Parameters["_viewportSize"].SetValue(_camera.ViewportDimensions);
 			_ptEffect.Parameters["_focalLength"].SetValue(_camera.Clip.Near);
-			_ptEffect.Parameters["_frame"].SetValue((int)_totalFrames);
+			_ptEffect.Parameters["_frame"].SetValue((int)_profiler.TotalFrames);
 			_ptEffect.Parameters["_screenX"].SetValue(GraphicsDevice.Viewport.Width);
 			_ptEffect.Parameters["_screenY"].SetValue(GraphicsDevice.Viewport.Height);
 			_ptEffect.Parameters["SPP"].SetValue(_settings.Samples);
@@ -280,15 +263,11 @@ namespace PathTracer.Core {
 			// Set Effect Parameters
 			if (_settings.Accumulation) {
 				_accumEffect.CurrentTechnique = _accumEffect.Techniques["AccumEnable"];
-				_accumEffect.Parameters["_frame"].SetValue((int)_accumFrames);
+				_accumEffect.Parameters["_frame"].SetValue((int)_settings.AccumulatedFrames);
 				_accumEffect.Parameters["PrevRender"].SetValue(_renderPrev);
-
-				/* Update number of frames only when accumulating */
-				_accumFrames++;
 			}
 			else {
 				_accumEffect.CurrentTechnique = _accumEffect.Techniques["AccumDisable"];
-				_accumFrames = 0;
 			}
 
 			// Draw Sprite Batch with Temporal Accumulation Effect
@@ -341,7 +320,7 @@ namespace PathTracer.Core {
 			Vector3 camDir = Vector3.Normalize(_camera.Target - _camera.Position);
 			string _valueStr =
 				"\n" +
-				$"Rotation (LMB): [{Round(_cameraRotate.X, 2)}, {Round(_cameraRotate.Y, 2)}]" + "\n" +
+				$"Rotation (LMB): [{Round(_cameraRot.X, 2)}, {Round(_cameraRot.Y, 2)}]" + "\n" +
 				$"TranslationXY (RMB): [{Round(_cameraXY.X, 2)}, {Round(_cameraXY.Y, 2)}]" + "\n" +
 				$"ZOOM (SCROLL): [{_cameraZ.Y.ToString("F1")}]"
 				+ "\n" + "\n" +

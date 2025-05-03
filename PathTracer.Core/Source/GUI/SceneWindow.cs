@@ -1,9 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using MonoGame.ImGuiNet;
 using ImGuiNET;
-using System;
-using System.Collections.Generic;
 using NumVector4 = System.Numerics.Vector4;
 using NumVector3 = System.Numerics.Vector3;
 using NumVector2 = System.Numerics.Vector2;
@@ -29,24 +25,11 @@ public class SceneWindow {
 		_numSpheres = numSpheres;
 	}
 
-	public void DrawGUI(string title) {
-		ImGui.SetNextItemOpen(true, ImGuiCond.Once);
-		if (!ImGui.CollapsingHeader(title))
-			return;
-
-		ImGui.SeparatorText("Toggle View");
-		if (ImGui.Button("Path Trace / Rasterize")) {
-
-		}
-
-		ImGui.Text(title);
-	}
-
 	public void DrawGUI(string title, ModelList models) {
 		ImGui.SetNextItemOpen(true, ImGuiCond.Once);
 		if (!ImGui.CollapsingHeader(title))
 			return;
-
+		
 		/* Draw nested items */
 		DrawSelectSphereButtons(models.Spheres);
 		DrawSphereSettings(ref models.Spheres);
@@ -79,12 +62,12 @@ public class SceneWindow {
 		ImGui.SeparatorText("Material Settings");
 		ImGui.ColorEdit4("Diffuse##DiffColor", ref _colorDiffuse);
 		ImGui.ColorEdit4("Specular##SpecColor", ref _colorSpecular);
-		ImGui.DragFloat("Smooth##SpecIntensity", ref _specular, v_speed: 0.001f, v_min: 0.0f, v_max: 1.0f);
-		ImGui.DragFloat("Gloss", ref _gloss, v_speed: 0.001f, v_min: 0.0f, v_max: 1.0f);
+		ImGui.SliderFloat("Smooth##SpecIntensity", ref _specular, v_min: 0.0f, v_max: 1.0f);
+		ImGui.SliderFloat("Gloss", ref _gloss, v_min: 0.0f, v_max: 1.0f);
 		ImGui.Separator();
 		ImGui.SeparatorText("Emission Settings");
 		ImGui.ColorEdit3("Color##LiteColor", ref _colorLight);
-		ImGui.SliderFloat("Intensity##LiteIntensity", ref _light, v_min: 0.0f, v_max: 100.0f);
+		ImGui.DragFloat("Intensity##LiteIntensity", ref _light, v_speed: 0.1f, v_min: 0.0f, v_max: 100.0f);
 		ImGui.SeparatorText("Transform Settings");
 		ImGui.Text("Position");
 		ImGui.Text("Radius");
