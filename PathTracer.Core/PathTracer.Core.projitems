@@ -16,7 +16,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)Source\Control\ControlHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Source\Control\KeyControl.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Source\Control\MouseControl.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)source\gui\SettingsWindow.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Source\GUI\ProfilerWindow.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Source\GUI\SceneWindow.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Source\GUI\SettingsWindow.cs" />
+    <Compile Include="..\PathTracer.Core\source\gui\MainWindow.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Source\Model\Material.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Source\Model\ModelList.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Source\Model\Sphere.cs" />
@@ -36,8 +39,5 @@
     <Content Include="$(MSBuildThisFileDirectory)Content\models\box\texture.png" />
     <Content Include="$(MSBuildThisFileDirectory)Content\models\sphere\texture.png" />
     <Content Include="$(MSBuildThisFileDirectory)NOTES.md" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="$(MSBuildThisFileDirectory)Source\GUI\" />
   </ItemGroup>
 </Project>

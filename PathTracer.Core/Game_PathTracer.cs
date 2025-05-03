@@ -4,8 +4,6 @@ using Microsoft.Xna.Framework.Input;
 using System;
 using System.Diagnostics;
 using static System.Math;
-using MonoGame.ImGuiNet;
-using ImGuiNET;
 
 using PathTracer.Core.Source.Camera;
 using PathTracer.Core.Source.Control;
@@ -30,7 +28,6 @@ namespace PathTracer.Core {
 
 		private long _totalFrames = 0;
 		private long _accumFrames = 0;
-		private float _fps = 0;
 
 		private Effect _ptEffect;
 		private Effect _accumEffect;
@@ -38,32 +35,23 @@ namespace PathTracer.Core {
 		private Model _sphere;
 		private PathTraceCamera _camera;
 
-		private Technique _technique = Technique.PATH_TRACE;
 		// private PathTracePass _pathTrace; // FIXME
 
 		private ControlHandler _controlHandler = new ControlHandler();
 		private MouseDrag _cameraRotate = new(new(0.5f, 0.7f), MouseButtonType.RIGHT, value: new(0, 0));
 		private MouseDrag _cameraXY = new(new(0.05f, 0.07f), MouseButtonType.RIGHT, value: new(0, 0));
 		private MouseDrag _cameraZ = new(new(0.05f, 0.07f), MouseButtonType.WHEEL, value: new(0, -10.0f));// TODO: MIN-MAX
-
-		/* TOGGLE BETWEEN TECHNIQUES */
-		private KeyToggle<Technique> _D1 = new(Keys.D1, Technique.PATH_TRACE);
-		private KeyToggle<Technique> _D2 = new(Keys.D2, Technique.RASTERIZE);
-
-		/* TOGGLE PATH TRACE DENOISE & RENDER MODE */
-		private KeyToggle<bool> _toggleDenoise = new(Keys.D, false);
-		private KeyToggle<bool> _toggleView = new(Keys.V, true);
-
-		/* PATH TRACE SAMPLES PER PIXEL & RAY BOUNCE LIMIT */
-		private KeyPair _SSP = new((Keys.Left, Keys.Right), value: 50, step: 1, bounds: (1, 500));
-		private KeyPair _BOUNCE = new((Keys.Up, Keys.Down), value: 1, step: 0.25f, bounds: (1, 500));
-
 		private KeyToggle<Action<ArcballCamera>> _cameraReset = new(Keys.S, (ArcballCamera c) => c.Reset());
 		private KeyToggle<Action<MouseControl<Vector2>>> _transformReset = new(Keys.S, (MouseControl<Vector2> t) => t.Value = Vector2.Zero);
 
 		/* PATH TRACE DATA */
 		ModelList _spheres = new ModelList();
-		SettingsWindow _settingsWindow;
+
+		/* GUI COMPONENTS */
+		private MainWindow _GUI;
+		private SceneWindow _sceneEdit;
+		private ProfilerWindow _profiler;
+		private SettingsWindow _settings;
 
 		public Game_PathTracer() {
 			_graphics = new GraphicsDeviceManager(this);
@@ -80,8 +68,11 @@ namespace PathTracer.Core {
 			_graphics.PreferredBackBufferHeight = 720;
 			_graphics.ApplyChanges();
 
-			/* Settings Window (GUI) */
-			_settingsWindow = new SettingsWindow(this, GraphicsDevice, _spheres.Size);
+			/* Initialize GUI Windows */
+			_GUI = new MainWindow(this, GraphicsDevice);
+			_sceneEdit = new (_spheres.Size);
+			_settings = new ();
+			_profiler = new ();
 
 			/* Main Camera */
 			_camera = new PathTraceCamera(
@@ -136,8 +127,7 @@ namespace PathTracer.Core {
 		protected override void LoadContent() {
 			_spriteBatch = new SpriteBatch(GraphicsDevice);
 
-			_settingsWindow.onLoad();
-
+			_GUI.onLoad();
 			_font = Content.Load<SpriteFont>("fonts/font");
 			_sphere = Content.Load<Model>("models/sphere/sphere");
 			_ptEffect = Content.Load<Effect>("shaders/path-tracer");
@@ -163,19 +153,6 @@ namespace PathTracer.Core {
 			_controlHandler.PollMouseDrag(_cameraRotate, (Vector2 v) => _camera.Rotate(new(v, 0)));
 			// _controlHandler.PollMouseDrag(_cameraXY,     (Vector2 v) => _camera.Translate(new(v, _camera.Offset.M43)));
 			_controlHandler.PollMouseDrag(_cameraZ, (Vector2 v) => _camera.Translate(new(_camera.Offset.M41, _camera.Offset.M42, v.Y)));
-
-			/* POLL SELECT TECHNIQUES */
-			_controlHandler.PollSelect(_D1, (Technique t) => _technique = t);
-			_controlHandler.PollSelect(_D2, (Technique t) => _technique = t);
-
-			/* POLL DENOISE TOGGLE */
-			_controlHandler.PollToggle(_toggleDenoise);
-
-			/* POLL VIEW TOGGLE */
-			_controlHandler.PollToggle(_toggleView);
-
-			_controlHandler.PollKeyPair(_SSP);
-			_controlHandler.PollKeyPair(_BOUNCE);
 
 			_controlHandler.MousePrevious(Mouse.GetState());
 			_controlHandler.KeyboardPrevious(Keyboard.GetState());
@@ -207,18 +184,18 @@ namespace PathTracer.Core {
 			);
 			/* TODO: Replace with DrawMain */
 			_spriteBatch.Draw(
-				(_toggleView.Value) ? _target : _unlitTarget,
+				(_settings.View) ? _target : _unlitTarget,
 				new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height),
 				Color.White
 			);
 			/* TODO: Replace with DrawUI */
 			_spriteBatch.Draw(
-				(_toggleView.Value) ? _unlitTarget : _target,
+				(_settings.View) ? _unlitTarget : _target,
 				new Rectangle(
-					25,
-					GraphicsDevice.Viewport.Bounds.Bottom - (GraphicsDevice.Viewport.Height / 4) - 25,
-					GraphicsDevice.Viewport.Width / 4,
-					GraphicsDevice.Viewport.Height / 4
+					x: GraphicsDevice.Viewport.Bounds.Right - (GraphicsDevice.Viewport.Width / 4) - 25,
+					y: GraphicsDevice.Viewport.Bounds.Bottom - (GraphicsDevice.Viewport.Height / 4) - 25,
+					width: GraphicsDevice.Viewport.Width / 4,
+					height: GraphicsDevice.Viewport.Height / 4
 				),
 				Color.White
 			);
@@ -229,13 +206,17 @@ namespace PathTracer.Core {
 			GraphicsDevice.GetBackBufferData(_textureData);
 			_renderCurr.SetData(_textureData);
 
-			/* Update FPS & total # of frames */
-			_fps = (float)(1 / (gameTime.ElapsedGameTime.TotalMilliseconds / 1000));
+			/* Update total # of frames */
 			_totalFrames++;
 
 			base.Draw(gameTime);
 
-			_settingsWindow.Draw(gameTime, models: ref _spheres);
+			/* Draw GUI & All Sub Windows */
+			_GUI.BeginDraw(gameTime);
+			_sceneEdit.DrawGUI("Scene Settings", _spheres);
+			_settings.DrawGUI("Render Settings");
+			_profiler.DrawGUI("Profiling", gameTime);
+			_GUI.EndDraw();
 		}
 
 		private Texture2D UnlitPass(RenderTarget2D target) {
@@ -262,7 +243,6 @@ namespace PathTracer.Core {
 			GraphicsDevice.Clear(ClearOptions.Target | ClearOptions.DepthBuffer, Color.Blue, 1.0f, 0);
 
 			// Set Effect Parameters
-			_ptEffect.CurrentTechnique = _ptEffect.Techniques[(int)_technique];
 			_ptEffect.Parameters["_cameraPosition"].SetValue(_camera.Position);
 			_ptEffect.Parameters["_cameraTransform"].SetValue(
 				Matrix.Multiply(_camera.Offset, Matrix.CreateFromQuaternion(_camera.Rotation))
@@ -272,8 +252,8 @@ namespace PathTracer.Core {
 			_ptEffect.Parameters["_frame"].SetValue((int)_totalFrames);
 			_ptEffect.Parameters["_screenX"].SetValue(GraphicsDevice.Viewport.Width);
 			_ptEffect.Parameters["_screenY"].SetValue(GraphicsDevice.Viewport.Height);
-			_ptEffect.Parameters["SPP"].SetValue((int)_SSP.Value);
-			_ptEffect.Parameters["BOUNCES"].SetValue((int)_BOUNCE.Value);
+			_ptEffect.Parameters["SPP"].SetValue(_settings.Samples);
+			_ptEffect.Parameters["BOUNCES"].SetValue(_settings.Bounces);
 
 			// Draw Sprite Batch with Path Tracing Effect
 			_spriteBatch.Begin(
@@ -298,7 +278,7 @@ namespace PathTracer.Core {
 			GraphicsDevice.SetRenderTarget(target);
 
 			// Set Effect Parameters
-			if (_toggleDenoise.Value) {
+			if (_settings.Accumulation) {
 				_accumEffect.CurrentTechnique = _accumEffect.Techniques["AccumEnable"];
 				_accumEffect.Parameters["_frame"].SetValue((int)_accumFrames);
 				_accumEffect.Parameters["PrevRender"].SetValue(_renderPrev);
@@ -369,12 +349,7 @@ namespace PathTracer.Core {
 				$"Rotated = [{Round(_camera.Rotation.X, 2)}, {Round(_camera.Rotation.Y, 2)}, {Round(_camera.Rotation.Z, 2)}]" + "\n" +
 				$"Offset = [{Round(_camera.Offset.M41, 2)}, {Round(_camera.Offset.M42, 2)}, {Round(_camera.Offset.M43, 2)}]" + "\n" +
 				$"Initial = [{Round(_camera.InitialPosition.X, 2)}, {Round(_camera.InitialPosition.Y, 2)}, {Round(_camera.InitialPosition.Z, 2)}]"
-				+ "\n" + "\n" +
-				$"Frames Per Second = [{Round(_fps, 1)}]" + "\n" +
-				$"Toggle View (V) = [{(_toggleView.Value ? "PATH TRACE" : "RASTERIZE")}]" + "\n" +
-				$"Accumulation (D) = [{(_toggleDenoise.Value ? "ON" : "OFF")}]" + "\n" +
-				$"Samples Per Pixel (Left | Right) = [{(int)(_SSP.Value)}]     " + "\n" +
-				$"Bounce Limit  (Up | Down) = [{(int)(_BOUNCE.Value)}]" + "\n";
+				+ "\n" + "\n";
 
 			_spriteBatch.DrawString(
 				_font, toggle ? _valueStr : "",
