@@ -20,12 +20,10 @@ namespace PathTracer.Core {
 
 		private RenderTarget2D _target;
 		private RenderTarget2D _unlitTarget;
-		private Texture2D _renderCurr;
 		private Texture2D _renderPrev;
 		private Color[]   _textureData;
 
 		private Effect _ptEffect;
-		private Effect _accumEffect;
 		private SpriteFont _font;
 		private Model _sphere;
 		private PathTraceCamera _camera;
@@ -35,7 +33,7 @@ namespace PathTracer.Core {
 		private ControlHandler _controlHandler = new();
 		private MouseDrag _cameraRot = new(new(0.5f, 0.7f),   MouseButtonType.RIGHT, value: new(0, 0));
 		private MouseDrag _cameraXY =  new(new(0.05f, 0.07f), MouseButtonType.RIGHT, value: new(0, 0));
-		private MouseDrag _cameraZ =   new(new(0.05f, 0.07f), MouseButtonType.WHEEL, value: new(0, -10)); // TODO: BOUNDS
+		private MouseDrag _cameraZ =   new(new(0.05f, 0.07f), MouseButtonType.WHEEL, value: new(0, -5)); // TODO: BOUNDS
 
 		/* SCENE DATA */
 		ModelList _spheres = new();
@@ -98,20 +96,14 @@ namespace PathTracer.Core {
 				usage: RenderTargetUsage.DiscardContents
 			);
 
-			/* Instantiate textures that will hold the previous & current renders */
-			_renderCurr = new Texture2D(
-				GraphicsDevice,
-				GraphicsDevice.PresentationParameters.BackBufferWidth,
-				GraphicsDevice.PresentationParameters.BackBufferHeight
-			);
-
+			/* Instantiate texture that will hold the previous renders */
 			_renderPrev = new Texture2D(
 				GraphicsDevice,
 				GraphicsDevice.PresentationParameters.BackBufferWidth,
 				GraphicsDevice.PresentationParameters.BackBufferHeight
 			);
 
-			/* Instantiate array that will be used to copy render data between textures */
+			/* Instantiate array that will be used to copy render data between GPU & CPU */
 			_textureData = new Color[_target.Width * _target.Height];
 
 			base.Initialize();
@@ -124,7 +116,6 @@ namespace PathTracer.Core {
 			_font = Content.Load<SpriteFont>("fonts/font");
 			_sphere = Content.Load<Model>("models/sphere/sphere");
 			_ptEffect = Content.Load<Effect>("shaders/path-tracer");
-			_accumEffect = Content.Load<Effect>("shaders/denoise");
 
 			// FIXME: RenderPass objects should load their own effects probably
 			// _pathTrace = new(ref _target, GraphicsDevice, ref _spriteBatch, _ptEffect, ref _camera);
@@ -153,30 +144,30 @@ namespace PathTracer.Core {
 		}
 
 		protected override void Draw(GameTime gameTime) {
-			/* Store the previous render in _RenderPrev */
-			_renderCurr.GetData(_textureData); // FIXME: Redundant if _textureData already holds prevRender data
+
+			/* Store previous render's data in _RenderPrev [WARNING: expensive operation] */
 			_renderPrev.SetData(_textureData);
 
-			/* First (Unlit) Pass, saved to renderUnlit */
-			_unlitTarget = (RenderTarget2D) UnlitPass(_unlitTarget);
+			/* Rasterized Pass */
+			UnlitPass(_unlitTarget);
 
 			/* Path Trace Pass */
-			_renderCurr = PathTracePass(_target);
+			PathTracePass(_target);
 
-			/* Temporal Accumulation Pass */
-			_renderCurr = AccumulationPass(_target);
+			/* Retrieve the current render data [WARNING: expensive operation] */
+			_target.GetData(_textureData);
 
 			/* Finally, draw to screen */
 			_spriteBatch.Begin(
 				SpriteSortMode.Deferred, BlendState.AlphaBlend,
 				rasterizerState: RasterizerState.CullNone, effect: null
 			);
-			_spriteBatch.Draw( /* TODO: Replace with DrawMain */
+			_spriteBatch.Draw(
 				(_settings.View) ? _target : _unlitTarget,
 				new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height),
 				Color.White
 			);
-			_spriteBatch.Draw( /* TODO: Replace with DrawUI */
+			_spriteBatch.Draw(
 				(_settings.View) ? _unlitTarget : _target,
 				new Rectangle(
 					x: GraphicsDevice.Viewport.Bounds.Right - (GraphicsDevice.Viewport.Width / 4) - 25,
@@ -188,15 +179,11 @@ namespace PathTracer.Core {
 			);
 			_spriteBatch.End();
 
-			/* Store the current render in _RenderCurr */
-			GraphicsDevice.GetBackBufferData(_textureData);
-			_renderCurr.SetData(_textureData);
-
 			base.Draw(gameTime);
 
 			/* Draw GUI & All Sub Windows */
 			_GUI.BeginDraw(gameTime);
-			_sceneEdit.DrawGUI("Scene Settings", _spheres);
+			_sceneEdit.DrawGUI("Scene Settings", _spheres, _ptEffect);
 			_settings.DrawGUI("Render Settings");
 			_profiler.DrawGUI("Profiling", gameTime);
 			_GUI.EndDraw();
@@ -237,6 +224,7 @@ namespace PathTracer.Core {
 			_ptEffect.Parameters["_screenY"].SetValue(GraphicsDevice.Viewport.Height);
 			_ptEffect.Parameters["SPP"].SetValue(_settings.Samples);
 			_ptEffect.Parameters["BOUNCES"].SetValue(_settings.Bounces);
+			_ptEffect.Parameters["_accumulated"].SetValue((int) _settings.AccumulatedFrames);
 
 			// Draw Sprite Batch with Path Tracing Effect
 			_spriteBatch.Begin(
@@ -244,45 +232,13 @@ namespace PathTracer.Core {
 				rasterizerState: RasterizerState.CullNone, effect: _ptEffect
 			);
 			_spriteBatch.Draw(
-				_renderCurr,
+				_renderPrev,
 				new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height),
 				Color.White
 			);
 			_spriteBatch.End();
 
 			// Drop the render target
-			GraphicsDevice.SetRenderTarget(null);
-
-			return target;
-		}
-
-		private Texture2D AccumulationPass(RenderTarget2D target) {
-			// Set the Render Target & Clear
-			GraphicsDevice.SetRenderTarget(target);
-
-			// Set Effect Parameters
-			if (_settings.Accumulation) {
-				_accumEffect.CurrentTechnique = _accumEffect.Techniques["AccumEnable"];
-				_accumEffect.Parameters["_frame"].SetValue((int)_settings.AccumulatedFrames);
-				_accumEffect.Parameters["PrevRender"].SetValue(_renderPrev);
-			}
-			else {
-				_accumEffect.CurrentTechnique = _accumEffect.Techniques["AccumDisable"];
-			}
-
-			// Draw Sprite Batch with Temporal Accumulation Effect
-			_spriteBatch.Begin(
-				SpriteSortMode.Deferred, BlendState.AlphaBlend,
-				rasterizerState: RasterizerState.CullNone, effect: _accumEffect
-			);
-			_spriteBatch.Draw(
-				_target,
-				new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height),
-				Color.White
-			);
-			_spriteBatch.End();
-
-			/* Drop the render target from device and set it on _RenderCurr */
 			GraphicsDevice.SetRenderTarget(null);
 
 			return target;

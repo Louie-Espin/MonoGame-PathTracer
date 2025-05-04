@@ -82,12 +82,6 @@
 /processorParam:TextureFormat=Color
 /build:models/sphere/texture.png
 
-#begin shaders/denoise.fx
-/importer:EffectImporter
-/processor:EffectProcessor
-/processorParam:DebugMode=Auto
-/build:shaders/denoise.fx
-
 #begin shaders/path-tracer.fx
 /importer:EffectImporter
 /processor:EffectProcessor

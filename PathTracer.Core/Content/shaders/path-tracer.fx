@@ -168,13 +168,23 @@ Hit IntersectSphere(Ray R, Sphere S) {
     return hitInfo;
 }
 
+/* Accumulate:
+ * Average the color of a fragment based on the current & previous renders of the scene
+ * Returns the accumulated fragment color
+ * READ: ---
+ */
+float4 Accumulate(float4 colorCurr, float4 colorPrev, int accumulated) {
+    float weight = 1.0 / (accumulated + 1);
+    return (accumulated > 0) ? (0.2 * colorCurr + 0.8 * colorPrev) : colorCurr;
+}
+
 /* ################################################################################################################################
  * 
  * SHADER PROPERTIES
  * 
  * ################################################################################################################################
  */
-#define NUM_SPHERES 5
+#define NUM_SPHERES 10
 
 float4x4 _worldMat;
 float4x4 _viewMat;
@@ -188,7 +198,8 @@ float2 _viewportSize;
 int SPP = 200; // (Samples-Per-Pixel) # of rays traced per pixel
 int BOUNCES = 100; // Maximum # of bounces to calculate on a ray 
 int _frame; // Index of current frame; used to randomize
-int _screenX, _screenY; // Width & Heigh of Screen in Pixels
+int _accumulated; // # of accumulated frames
+int _screenX, _screenY; // Width & Height of screen (in pixels)
 
 /* ARRAY OF SPHERES */
 float3 SPHERE_POS[NUM_SPHERES];
@@ -201,9 +212,9 @@ float  SPHERE_GLOSS[NUM_SPHERES];
 float  SPHERE_LITE[NUM_SPHERES];
 /* **************** */
 
-/* Texture that will be targeted by SpriteBatch before drawing */
-sampler TextureSampler = sampler_state {
-    Texture = <ViewportTexture>;
+/* Previous Render information (for temporal accumulation) */
+sampler TextureSampler : register(s0) { // s0 is targeted by SpriteBatch on Draw
+    Texture = <PrevRender>;
 };
 
 /* ################################################################################################################################
@@ -291,10 +302,6 @@ float4 FS_Main(FS_Input input) : COLOR0 {
     uint pixelIdx = pixelCoord.y * numPixels.x + pixelCoord.x;
     uint rng = pixelIdx + _frame * 719393;
     
-    
-    // Hit hit = CalculateSpheres(r);
-    // return hit.hit ? hit.material.Color : float4(r.Direction, color.w);
-    
     // Trace Pixel Color
     float3 totalPixelColor = float3(0, 0, 0);
     for (int rayIdx = 0; rayIdx < SPP; rayIdx++) {
@@ -302,8 +309,8 @@ float4 FS_Main(FS_Input input) : COLOR0 {
     }
     float3 avgColor = totalPixelColor / SPP;
     
-    return float4(avgColor, 1);
-
+    /* Return the accumulated color */
+    return Accumulate(float4(avgColor, 1), color, _accumulated);
 }
 
 float4 FS_Rasterize(FS_Input input) : COLOR0 {

@@ -4,9 +4,14 @@ using NumVector4 = System.Numerics.Vector4;
 using NumVector3 = System.Numerics.Vector3;
 using NumVector2 = System.Numerics.Vector2;
 using PathTracer.Core.Source.Model;
+using System;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace PathTracer.Core.Source.GUI; 
 public class SceneWindow {
+
+	ImGuiChildFlags flags = ImGuiChildFlags.ResizeY;
+	ImGuiWindowFlags _flags2 = ImGuiWindowFlags.NoBackground;
 
 	/* SPHERE SETTINGS */
 	int _currentSphere = 0;
@@ -25,14 +30,24 @@ public class SceneWindow {
 		_numSpheres = numSpheres;
 	}
 
-	public void DrawGUI(string title, ModelList models) {
-		ImGui.SetNextItemOpen(true, ImGuiCond.Once);
-		if (!ImGui.CollapsingHeader(title))
+	public void DrawGUI(string title, ModelList models, Effect effect) {
+		NumVector2 size = new(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().Y / 2);
+
+		if (!ImGui.BeginChild($"{title}##sceneChild", size, flags))
 			return;
 		
-		/* Draw nested items */
-		DrawSelectSphereButtons(models.Spheres);
-		DrawSphereSettings(ref models.Spheres);
+		/* Draw scene item settings */
+		for (int i = 0; i < models.Spheres.Length; i++) {
+			DrawSphereSettings(ref models.Spheres[i], i);
+			ImGui.Dummy(new(0,5));
+		}
+
+		ImGui.EndChild();
+
+		/* Set _ptEffect with a list of default sphere object data FIXME DONT DO THIS!!!! */
+		foreach (SphereParam e in Enum.GetValues(typeof(SphereParam))) {
+			models.SetData(ref effect, e);
+		}
 	}
 
 	public void SetCurrentSphere(int index, Sphere sphere) {
@@ -47,30 +62,33 @@ public class SceneWindow {
 		_light = sphere.Light;
 	}
 
-	public void DrawSelectSphereButtons(Sphere[] spheres) {
-		ImGui.SeparatorText("Select Sphere");
-		ImGui.NewLine();
-		for (int i = 0; i < spheres.Length; i++) {
-			ImGui.SameLine();
-			if (ImGui.Button($"{i}"))
-				SetCurrentSphere(i, spheres[i]);
-		}
-	}
+	public void DrawSphereSettings(ref Sphere _sphere, int idx) {
+		
+		ImGui.SetNextItemOpen(true, ImGuiCond.Once);
+		if (!ImGui.CollapsingHeader($"sphere[{idx}]"))
+			return;
 
-	public void DrawSphereSettings(ref Sphere[] _sphere) {
-		ImGui.BeginGroup();
+		/* Material Settings */
 		ImGui.SeparatorText("Material Settings");
-		ImGui.ColorEdit4("Diffuse##DiffColor", ref _colorDiffuse);
-		ImGui.ColorEdit4("Specular##SpecColor", ref _colorSpecular);
-		ImGui.SliderFloat("Smooth##SpecIntensity", ref _specular, v_min: 0.0f, v_max: 1.0f);
-		ImGui.SliderFloat("Gloss", ref _gloss, v_min: 0.0f, v_max: 1.0f);
-		ImGui.Separator();
+		ImGui.ColorEdit4($"Diffuse##DiffColor[{idx}]", ref _sphere.DiffuseColor);
+		ImGui.ColorEdit4($"Specular##SpecColor[{idx}]", ref _sphere.SpecularColor);
+		ImGui.SliderFloat($"Smooth##SpecIntensity[{idx}]", ref _sphere.Specular, v_min: 0.0f, v_max: 1.0f);
+		ImGui.SliderFloat($"Gloss##Gloss[{idx}]", ref _sphere.Gloss, v_min: 0.0f, v_max: 1.0f);
+
+		ImGui.Dummy(new(0, 2));
+
+		/* Emission Settings */
 		ImGui.SeparatorText("Emission Settings");
-		ImGui.ColorEdit3("Color##LiteColor", ref _colorLight);
-		ImGui.DragFloat("Intensity##LiteIntensity", ref _light, v_speed: 0.1f, v_min: 0.0f, v_max: 100.0f);
+		ImGui.ColorEdit3($"Color##LiteColor[{idx}]", ref _sphere.LightColor);
+		ImGui.DragFloat($"Intensity##LiteIntensity[{idx}]", ref _sphere.Light, v_speed: 0.1f, v_min: 0.0f, v_max: 100.0f);
+
+		ImGui.Dummy(new(0, 2));
+
+		/* Transform Settings */
 		ImGui.SeparatorText("Transform Settings");
 		ImGui.Text("Position");
 		ImGui.Text("Radius");
-		ImGui.EndGroup();
+
+		ImGui.Dummy(new(0, 2));
 	}
 }

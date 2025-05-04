@@ -16,6 +16,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Source\Control\ControlHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Source\Control\KeyControl.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Source\Control\MouseControl.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Source\GUI\Components.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Source\GUI\ProfilerWindow.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Source\GUI\SceneWindow.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Source\GUI\SettingsWindow.cs" />

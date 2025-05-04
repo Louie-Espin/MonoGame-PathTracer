@@ -52,40 +52,12 @@ public class Sphere {
 		Gloss = 0;
 	}
 
-	public NumVector3 Position {
-		get => position;
-		set { position = value; }
-	}
-
-	public float Radius => radius;
-
-	public NumVector4 DiffuseColor {
-		get { return material.color; }
-		set { material.color = value; }
-	}
-
-	public NumVector3 LightColor {
-		get => material.lightColor;
-		set { material.lightColor = value; }
-	}
-
-	public NumVector4 SpecularColor {
-		get => material.specularColor;
-		set { material.specularColor = value; }
-	}
-
-	public float Light {
-		get => material.lightIntensity;
-		set { material.lightIntensity = value; }
-	}
-
-    public float Specular {  
-		get => material.specularIntensity;
-		set { material.specularIntensity = Math.Clamp(value, 0, 1); }
-	}
-
-	public float Gloss {
-		get =>  material.gloss;
-		set { material.gloss = Math.Clamp(value, 0, 1); }
-	}
+	public ref NumVector3 Position => ref position;
+	public ref float Radius => ref radius;
+	public ref NumVector4 DiffuseColor => ref material.color;
+	public ref NumVector3 LightColor => ref material.lightColor;
+	public ref NumVector4 SpecularColor => ref material.specularColor;
+	public ref float Light => ref material.lightIntensity;
+    public ref float Specular => ref material.specularIntensity;
+	public ref float Gloss => ref material.gloss;
 }

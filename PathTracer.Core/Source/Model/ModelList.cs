@@ -14,14 +14,19 @@ public enum SphereParam {
 	SPHERE_LITE 
 }
 public class ModelList {
-	const int NUM_SPHERES = 5;
+	const int NUM_SPHERES = 10;
 	int _selected = 0;
 	Sphere[] _spheres = [
-		new( position: new(0, 0, 60),  radius: 40, lightColor:   new(1, 1, 1),    lightIntensity: 5.0f ),
-		new( position: new(0, -32, 0), radius: 30, diffuseColor: new(1, 0, 1, 1), specular: 0.4f, gloss: 0.6f ),
-		new( position: new(4, 0, 0),   radius: 2,  diffuseColor: new(1, 0, 0, 1), specular: 1.0f, gloss: 1.0f ),
-		new( position: new(0, 0, 0),   radius: 2,  diffuseColor: new(0, 1, 0, 1), specular: 1.0f, gloss: 0.7f ),
-		new( position: new(-4, 0, 0),  radius: 2,  diffuseColor: new(0, 0, 1, 1), specular: 0.5f, gloss: 0.5f ),
+		new( position: new(0, 14, 0),    radius: 10f,  lightColor:   new(1, 1, 1),    lightIntensity: 1.0f ),
+		new( position: new(0, 0, 0),     radius: 001,  diffuseColor: new(1, 1, 1, 1), specular: 1.0f, gloss: 1.0f ),
+		new( position: new(3, 0, 0),     radius: 001,  diffuseColor: new(1, 0, 0, 1), specular: 1.0f, gloss: 0.5f ),
+		new( position: new(-3, 0, 0),    radius: 001,  diffuseColor: new(0, 1, 0, 1), specular: 1.0f, gloss: 0.5f ),
+		new( position: new(0, 0, 205),   radius: 200,  diffuseColor: new(1, 1, 1, 1), specular: 0.0f, gloss: 0.0f ),
+		new( position: new(0, 0, -205),  radius: 200,  diffuseColor: new(1, 1, 1, 1), specular: 0.0f, gloss: 0.0f ),
+		new( position: new(0, 205, 0),   radius: 200,  diffuseColor: new(1, 1, 1, 1), specular: 0.0f, gloss: 0.0f ),
+		new( position: new(0, -205, 0),  radius: 200,  diffuseColor: new(1, 1, 1, 1), specular: 0.0f, gloss: 0.0f ),
+		new( position: new(205, 0, 0),   radius: 200,  diffuseColor: new(1, 1, 1, 1), specular: 0.0f, gloss: 0.0f ),
+		new( position: new(-205, 0, 0),  radius: 200,  diffuseColor: new(1, 1, 1, 1), specular: 0.0f, gloss: 0.0f ),
 	];
 
 	/* Shortcuts for accessing effect parameters */
