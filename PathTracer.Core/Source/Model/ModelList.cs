@@ -14,20 +14,34 @@ public enum SphereParam {
 	SPHERE_LITE 
 }
 public class ModelList {
+
+	private Effect _effect;
 	const int NUM_SPHERES = 10;
-	int _selected = 0;
 	Sphere[] _spheres = [
-		new( position: new(0, 14, 0),    radius: 10f,  lightColor:   new(1, 1, 1),    lightIntensity: 1.0f ),
-		new( position: new(0, 0, 0),     radius: 001,  diffuseColor: new(1, 1, 1, 1), specular: 1.0f, gloss: 1.0f ),
-		new( position: new(3, 0, 0),     radius: 001,  diffuseColor: new(1, 0, 0, 1), specular: 1.0f, gloss: 0.5f ),
-		new( position: new(-3, 0, 0),    radius: 001,  diffuseColor: new(0, 1, 0, 1), specular: 1.0f, gloss: 0.5f ),
-		new( position: new(0, 0, 205),   radius: 200,  diffuseColor: new(1, 1, 1, 1), specular: 0.0f, gloss: 0.0f ),
-		new( position: new(0, 0, -205),  radius: 200,  diffuseColor: new(1, 1, 1, 1), specular: 0.0f, gloss: 0.0f ),
-		new( position: new(0, 205, 0),   radius: 200,  diffuseColor: new(1, 1, 1, 1), specular: 0.0f, gloss: 0.0f ),
-		new( position: new(0, -205, 0),  radius: 200,  diffuseColor: new(1, 1, 1, 1), specular: 0.0f, gloss: 0.0f ),
-		new( position: new(205, 0, 0),   radius: 200,  diffuseColor: new(1, 1, 1, 1), specular: 0.0f, gloss: 0.0f ),
-		new( position: new(-205, 0, 0),  radius: 200,  diffuseColor: new(1, 1, 1, 1), specular: 0.0f, gloss: 0.0f ),
+		new( position: new(0, 14.5f, 0), radius: 10f,  lightColor:   new(1, 1, 1),    lightIntensity: 1.0f, "Light" ),
+		new( position: new(0, 0, 0),     radius: 1.5f, diffuseColor: new(1, 1, 1, 1), specular: 1.0f, gloss: 1.0f ),
+		new( position: new(3, 3, 0),     radius: 1.5f, diffuseColor: new(1, 0, 0, 1), specular: 1.0f, gloss: 0.5f ),
+		new( position: new(-3, -3, 0),   radius: 1.5f, diffuseColor: new(0, 1, 0, 1), specular: 1.0f, gloss: 0.5f ),
+		new( position: new(0, 0, 205),   radius: 200,  diffuseColor: new(1, 1, 1, 1), specular: 0.0f, gloss: 0.0f, "Wall Z"  ),
+		new( position: new(0, 0, -205),  radius: 200,  diffuseColor: new(1, 1, 1, 1), specular: 0.0f, gloss: 0.0f, "Wall -Z" ),
+		new( position: new(0, 205, 0),   radius: 200,  diffuseColor: new(1, 1, 1, 1), specular: 0.0f, gloss: 0.0f, "Wall Y"  ),
+		new( position: new(0, -205, 0),  radius: 200,  diffuseColor: new(1, 1, 1, 1), specular: 0.0f, gloss: 0.0f, "Wall -Y" ),
+		new( position: new(205, 0, 0),   radius: 200,  diffuseColor: new(1, 1, 1, 1), specular: 1.0f, gloss: 0.8f, "Wall X"  ),
+		new( position: new(-205, 0, 0),  radius: 200,  diffuseColor: new(1, 1, 1, 1), specular: 1.0f, gloss: 0.8f, "Wall -X" ),
 	];
+
+	/* Set the Path Tracer Effect with a list of default sphere object data */
+	public void onLoad(Effect pathTracerEffect) {
+		_effect = pathTracerEffect;
+		
+		/* Monogame lacks 'StructuredBuffer' data types that would allow us to send sphere data 
+		 * to the GPU in a sequential order. Instead, we work around this limitation by sending 
+		 * sphere data through multiple arrays, each containing the values of one specific sphere parameter.
+		 */
+		foreach (SphereParam e in Enum.GetValues(typeof(SphereParam))) {
+			SetData(e);
+		}
+	}
 
 	/* Shortcuts for accessing effect parameters */
 	EffectParameter _positionParam;
@@ -38,13 +52,6 @@ public class ModelList {
 	EffectParameter _liteParam;
 	EffectParameter _specParam;
 	EffectParameter _glossParam;
-
-	public int Selected {
-		get => _selected;
-		set { _selected = (_selected + 1) % 5; }
-	}
-
-	public int Size => NUM_SPHERES;
 
 	public void setParams(ref Effect ptEffect) {
 		/* Setting up Effects */
@@ -61,7 +68,7 @@ public class ModelList {
 	public ref Sphere[] Spheres => ref _spheres;
 
 	/* FIXME: Not DRY. Find a way to get generic Sphere properties */
-	public void SetData(ref Effect ptEffect, SphereParam param) {
+	public void SetData(SphereParam param) {
 
 		switch (param) {
 			case SphereParam.SPHERE_POS: {
@@ -69,7 +76,7 @@ public class ModelList {
 				for (int i = 0; i < NUM_SPHERES; i++) {
 					_arr[i] = _spheres[i].Position;
 				}
-				ptEffect.Parameters["SPHERE_POS"].SetValue(_arr);
+				_effect.Parameters["SPHERE_POS"].SetValue(_arr);
 				return;
 			}
 			case SphereParam.SPHERE_RADIUS: {
@@ -77,7 +84,7 @@ public class ModelList {
 				for (int i = 0; i < NUM_SPHERES; i++) {
 					_arr[i] = _spheres[i].Radius;
 				}
-				ptEffect.Parameters["SPHERE_RADIUS"].SetValue(_arr);
+				_effect.Parameters["SPHERE_RADIUS"].SetValue(_arr);
 				return;
 			}
 			case SphereParam.SPHERE_DIFF_COL: {
@@ -85,7 +92,7 @@ public class ModelList {
 				for (int i = 0; i < NUM_SPHERES; i++) {
 					_arr[i] = _spheres[i].DiffuseColor;
 				}
-				ptEffect.Parameters["SPHERE_DIFF_COL"].SetValue(_arr);
+				_effect.Parameters["SPHERE_DIFF_COL"].SetValue(_arr);
 				return;
 			}
 			case SphereParam.SPHERE_SPEC_COL: {
@@ -93,7 +100,7 @@ public class ModelList {
 				for (int i = 0; i < NUM_SPHERES; i++) {
 					_arr[i] = _spheres[i].SpecularColor;
 				}
-				ptEffect.Parameters["SPHERE_SPEC_COL"].SetValue(_arr);
+				_effect.Parameters["SPHERE_SPEC_COL"].SetValue(_arr);
 				return;
 			}
 			case SphereParam.SPHERE_LITE_COL: {
@@ -101,7 +108,7 @@ public class ModelList {
 				for (int i = 0; i < NUM_SPHERES; i++) {
 					_arr[i] = _spheres[i].LightColor;
 				}
-				ptEffect.Parameters["SPHERE_LITE_COL"].SetValue(_arr);
+				_effect.Parameters["SPHERE_LITE_COL"].SetValue(_arr);
 				return;
 			}
 			case SphereParam.SPHERE_SPEC: {
@@ -109,7 +116,7 @@ public class ModelList {
 				for (int i = 0; i < NUM_SPHERES; i++) {
 					_arr[i] = _spheres[i].Specular;
 				}
-				ptEffect.Parameters["SPHERE_SPEC"].SetValue(_arr);
+				_effect.Parameters["SPHERE_SPEC"].SetValue(_arr);
 				return;
 			}
 			case SphereParam.SPHERE_LITE: {
@@ -117,7 +124,7 @@ public class ModelList {
 				for (int i = 0; i < NUM_SPHERES; i++) {
 					_arr[i] = _spheres[i].Light;
 				}
-				ptEffect.Parameters["SPHERE_LITE"].SetValue(_arr);
+				_effect.Parameters["SPHERE_LITE"].SetValue(_arr);
 				return;
 			}
 			case SphereParam.SPHERE_GLOSS: {
@@ -125,7 +132,7 @@ public class ModelList {
 				for (int i = 0; i < NUM_SPHERES; i++) {
 					_arr[i] = _spheres[i].Gloss;
 				}
-				ptEffect.Parameters["SPHERE_GLOSS"].SetValue(_arr);
+				_effect.Parameters["SPHERE_GLOSS"].SetValue(_arr);
 				return;
 			}
 			default:

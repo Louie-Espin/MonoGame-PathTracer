@@ -5,13 +5,13 @@ using System;
 
 namespace PathTracer.Core.Source.Model; 
 public class Sphere {
-
+	private string _id;
 	private NumVector3 position;
 	private float radius;
 	private Material material;
 
 	/* Constructs a Sphere */
-	public Sphere(NumVector3 position, float radius, NumVector4 diffuseColor, NumVector4 specularColor, float specular, float gloss) {
+	public Sphere(NumVector3 position, float radius, NumVector4 diffuseColor, NumVector4 specularColor, float specular, float gloss, string id = "Sphere") {
 		Position = position;
 		this.radius = radius;
 		material = new Material();
@@ -22,10 +22,12 @@ public class Sphere {
 
 		Light = 0;
 		LightColor = new(0, 0, 0); // No light
+
+		_id = id;
 	}
 
 	/* Constructs a Sphere, assumes SpecularColor is White */
-	public Sphere(NumVector3 position, float radius, NumVector4 diffuseColor, float specular, float gloss) {
+	public Sphere(NumVector3 position, float radius, NumVector4 diffuseColor, float specular, float gloss, string id = "Sphere") {
 		Position = position;
 		this.radius = radius;
 		material = new Material();
@@ -36,10 +38,12 @@ public class Sphere {
 		Light = 0;
 		LightColor    = new(0,0,0);   // No light
 		SpecularColor = new(1,1,1,1); // Default: white specular light
+
+		_id = id;
 	}
 
 	/* Constructs light-emitting Sphere */
-	public Sphere(NumVector3 position, float radius, NumVector3 lightColor, float lightIntensity) {
+	public Sphere(NumVector3 position, float radius, NumVector3 lightColor, float lightIntensity, string id = "Sphere") {
 		Position = position;
 		this.radius = radius;
 		material = new Material();
@@ -50,6 +54,8 @@ public class Sphere {
 		SpecularColor = new(0,0,0,1);
 		Specular = 0;
 		Gloss = 0;
+
+		_id = id;
 	}
 
 	public ref NumVector3 Position => ref position;
@@ -60,4 +66,5 @@ public class Sphere {
 	public ref float Light => ref material.lightIntensity;
     public ref float Specular => ref material.specularIntensity;
 	public ref float Gloss => ref material.gloss;
+	public string Id => _id;
 }

@@ -171,11 +171,13 @@ Hit IntersectSphere(Ray R, Sphere S) {
 /* Accumulate:
  * Average the color of a fragment based on the current & previous renders of the scene
  * Returns the accumulated fragment color
- * READ: ---
+ * READ: https://teamwisp.github.io/research/temporal_accumulation.html
  */
-float4 Accumulate(float4 colorCurr, float4 colorPrev, int accumulated) {
-    float weight = 1.0 / (accumulated + 1);
-    return (accumulated > 0) ? (0.2 * colorCurr + 0.8 * colorPrev) : colorCurr;
+float4 Accumulate(float4 colorCurr, float4 colorPrev, int accumulated, bool weighted) {
+    if (accumulated == 0) return colorCurr;
+    
+    float a = (weighted) ? (1.0 / (accumulated + 1)) : 0.2f;
+    return saturate((a) * colorCurr + (1-a) * colorPrev);
 }
 
 /* ################################################################################################################################
@@ -199,6 +201,7 @@ int SPP = 200; // (Samples-Per-Pixel) # of rays traced per pixel
 int BOUNCES = 100; // Maximum # of bounces to calculate on a ray 
 int _frame; // Index of current frame; used to randomize
 int _accumulated; // # of accumulated frames
+bool _accumWeighted;
 int _screenX, _screenY; // Width & Height of screen (in pixels)
 
 /* ARRAY OF SPHERES */
@@ -310,7 +313,7 @@ float4 FS_Main(FS_Input input) : COLOR0 {
     float3 avgColor = totalPixelColor / SPP;
     
     /* Return the accumulated color */
-    return Accumulate(float4(avgColor, 1), color, _accumulated);
+    return Accumulate(float4(avgColor, 1), color, _accumulated, _accumWeighted);
 }
 
 float4 FS_Rasterize(FS_Input input) : COLOR0 {
