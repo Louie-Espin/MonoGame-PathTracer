@@ -33,7 +33,6 @@
     <None Include="$(MSBuildThisFileDirectory)Content\fonts\font.spritefont" />
     <None Include="$(MSBuildThisFileDirectory)Content\models\box\box.fbx" />
     <None Include="$(MSBuildThisFileDirectory)Content\models\sphere\sphere.fbx" />
-    <None Include="$(MSBuildThisFileDirectory)Content\shaders\denoise.fx" />
     <None Include="$(MSBuildThisFileDirectory)Content\shaders\path-tracer.fx" />
   </ItemGroup>
   <ItemGroup>

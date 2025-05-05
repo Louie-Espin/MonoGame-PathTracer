@@ -52,7 +52,7 @@ namespace PathTracer.Core {
 		}
 
 		protected override void Initialize() {
-			/* Request preferred resolution & keep track of screen size */
+			/* Request preferred resolution & keep track of screen information */
 			_graphics.PreferredBackBufferWidth  = 1280;
 			_graphics.PreferredBackBufferHeight = 720;
 			_graphics.ApplyChanges();

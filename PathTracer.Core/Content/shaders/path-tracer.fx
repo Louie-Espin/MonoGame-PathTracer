@@ -289,7 +289,7 @@ float4 FS_Main(FS_Input input) : COLOR0 {
 	
     float4 color = tex2D(TextureSampler, input.TextureCoord);
 	
-    /* pixel coordinates as a percetange of the screen, from 0 to 1 on each axis */
+    /* pixel coordinates as a percentange of the screen, from 0 to 1 on each axis */
     float2 uv = input.TextureCoord.xy;
 	
     /* Calculate the Position for a given Point in the Viewport */

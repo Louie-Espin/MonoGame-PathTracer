@@ -18,16 +18,16 @@ public class ModelList {
 	private Effect _effect;
 	const int NUM_SPHERES = 10;
 	Sphere[] _spheres = [
-		new( position: new(0, 14.5f, 0), radius: 10f,  lightColor:   new(1, 1, 1),    lightIntensity: 1.0f, "Light" ),
+		new( position: new(0, 18.5f, 0), radius: 14f,  lightColor:   new(1, 1, 1),    lightIntensity: 1.0f, "Light" ),
 		new( position: new(0, 0, 0),     radius: 1.5f, diffuseColor: new(1, 1, 1, 1), specular: 1.0f, gloss: 1.0f ),
-		new( position: new(3, 3, 0),     radius: 1.5f, diffuseColor: new(1, 0, 0, 1), specular: 1.0f, gloss: 0.5f ),
-		new( position: new(-3, -3, 0),   radius: 1.5f, diffuseColor: new(0, 1, 0, 1), specular: 1.0f, gloss: 0.5f ),
-		new( position: new(0, 0, 205),   radius: 200,  diffuseColor: new(1, 1, 1, 1), specular: 0.0f, gloss: 0.0f, "Wall Z"  ),
-		new( position: new(0, 0, -205),  radius: 200,  diffuseColor: new(1, 1, 1, 1), specular: 0.0f, gloss: 0.0f, "Wall -Z" ),
-		new( position: new(0, 205, 0),   radius: 200,  diffuseColor: new(1, 1, 1, 1), specular: 0.0f, gloss: 0.0f, "Wall Y"  ),
+		new( position: new(3, 3, 0),     radius: 1.5f, diffuseColor: new(1, 0, 0, 1), specular: 1.0f, gloss: 0.2f ),
+		new( position: new(-3, -3, 0),   radius: 1.5f, diffuseColor: new(0, 1, 0, 1), specular: 1.0f, gloss: 0.2f ),
+		new( position: new(205, 0, 0),   radius: 200,  diffuseColor: new(1, 1, 1, 1), specular: 1.0f, gloss: 1.0f, "Wall X"  ),
+		new( position: new(-205, 0, 0),  radius: 200,  diffuseColor: new(1, 1, 1, 1), specular: 1.0f, gloss: 1.0f, "Wall -X" ),
+		new( position: new(0, 205.1f, 0),radius: 200,  diffuseColor: new(1, 1, 1, 1), specular: 0.0f, gloss: 0.0f, "Wall Y"  ),
 		new( position: new(0, -205, 0),  radius: 200,  diffuseColor: new(1, 1, 1, 1), specular: 0.0f, gloss: 0.0f, "Wall -Y" ),
-		new( position: new(205, 0, 0),   radius: 200,  diffuseColor: new(1, 1, 1, 1), specular: 1.0f, gloss: 0.8f, "Wall X"  ),
-		new( position: new(-205, 0, 0),  radius: 200,  diffuseColor: new(1, 1, 1, 1), specular: 1.0f, gloss: 0.8f, "Wall -X" ),
+		new( position: new(0, 0, 205),   radius: 200,  diffuseColor: new(0, 1, 0, 1), specular: 0.0f, gloss: 0.0f, "Wall Z"  ),
+		new( position: new(0, 0, -205),  radius: 200,  diffuseColor: new(1, 0, 0, 1), specular: 0.0f, gloss: 0.0f, "Wall -Z" ),
 	];
 
 	/* Set the Path Tracer Effect with a list of default sphere object data */

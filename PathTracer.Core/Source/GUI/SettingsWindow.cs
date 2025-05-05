@@ -8,8 +8,8 @@ public class SettingsWindow {
 
 	private bool _view = true;
 	private int _accumulation = (int) Accumulate.CONSTANT;
-	private int _SPP = 20;
-	private int _BOUNCE = 5;
+	private int _SPP = 3;
+	private int _BOUNCE = 10;
 	private long _accumFrames = 0;
 
 	const string _helpText =  "Off:      Disable temporal accumulation." + "\n"
