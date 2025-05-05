@@ -213,8 +213,8 @@ namespace PathTracer.Core {
 			_effect.Parameters["_viewportSize"].SetValue(_camera.ViewportDimensions);
 			_effect.Parameters["_focalLength"].SetValue(_camera.Clip.Near);
 			_effect.Parameters["_frame"].SetValue((int)_profiler.TotalFrames);
-			_effect.Parameters["_screenX"].SetValue(GraphicsDevice.Viewport.Width);
-			_effect.Parameters["_screenY"].SetValue(GraphicsDevice.Viewport.Height);
+			_effect.Parameters["_screenX"].SetValue(_screen.Width);
+			_effect.Parameters["_screenY"].SetValue(_screen.Height);
 			_effect.Parameters["SPP"].SetValue(_settings.Samples);
 			_effect.Parameters["BOUNCES"].SetValue(_settings.Bounces);
 			_effect.Parameters["_accumulated"].SetValue((int) _settings.AccumulatedFrames);
@@ -227,7 +227,7 @@ namespace PathTracer.Core {
 			);
 			_spriteBatch.Draw(
 				_renderPrev,
-				new Rectangle(0, 0, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height),
+				new Rectangle(0, 0, _screen.Width, _screen.Height),
 				Color.White
 			);
 			_spriteBatch.End();

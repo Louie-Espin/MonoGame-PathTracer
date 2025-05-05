@@ -102,29 +102,36 @@ float3 ViewportPointLocal(float2 uv, float focalLength, float2 viewportSize) {
 }
 
 /* ################################################################################################################################
- * RNG FUNCTIONS - FIXME: research into normal distribution rng & attribute missing sources
+ * RNG FUNCTIONS
  * ################################################################################################################################
  */
 
-float getPCG(inout uint state) {
-    state = state * 747796405 + 2891336453;
-    uint result = ((state >> ((state >> 28) + 4)) ^ state) * 277803737;
-    result = (result >> 22) ^ result;
-    return result;
+/* LCG-XS technique for random number generation 
+ * Credit: Caden Parker https://vectrx.substack.com/p/lcg-xs-fast-gpu-rng 
+ */
+uint lcg_xs_24(inout uint state) {
+  uint result = state * 747796405u + 2891336453u;
+  uint hashed_result = result ^ (result >> 14);
+  state = hashed_result;
+  return hashed_result >> 8;
 }
 
+/* Credit: Caden Parker https://vectrx.substack.com/p/lcg-xs-fast-gpu-rng */
 float rand(inout uint state) {
-    return getPCG(state) / 4294967295.0; // 2^32 - 1
+  uint result = lcg_xs_24(state);
+  const float inv_max_int = 1.0 / 16777216.0;
+  return float(result) * inv_max_int;
 }
 
-float rand_MC(inout uint state) {
+/* Converts uniformly distributed random float into gaussian/normal distribution */
+float gauss(inout uint state, float mean = 0, float sd = 1) {
     float theta = 2 * 3.1415926 * rand(state);
     float rho = sqrt(-2 * log(rand(state)));
-    return rho * cos(theta);
+    return mean + (sd * rho) * cos(theta);
 }
 
 float3 Random(inout uint state) {
-    float3 dir = float3(rand_MC(state), rand_MC(state), rand_MC(state));
+    float3 dir = float3(gauss(state), gauss(state), gauss(state));
     return normalize(dir);
 }
 
@@ -188,10 +195,6 @@ float4 Accumulate(float4 colorCurr, float4 colorPrev, int accumulated, bool weig
  */
 #define NUM_SPHERES 10
 
-float4x4 _worldMat;
-float4x4 _viewMat;
-float4x4 _projectionMat;
-
 float3 _cameraPosition; // Camera Position in World-Space Coordinates 
 float4x4 _cameraTransform; // Camera Transformation Matrix
 float _focalLength; // d: Length between Camera & Viewport
@@ -229,11 +232,12 @@ sampler TextureSampler : register(s0) { // s0 is targeted by SpriteBatch on Draw
 
 /* CalculateSpheres(R) */
 Hit CalculateSpheres(Ray R) {  
-    /* We haven't hit anything, so our closest hit is inifinitely far away */
+    /* We haven't hit anything, so our closest hit is infinitely far away */
     Hit closestHit = (Hit) 0;
     closestHit.distance = 1000000000;
     
     for (int i = 0; i < NUM_SPHERES; i++) {
+        /* In lieu of a structured buffer, instantiate a new sphere[i] object for each iteration */
         Material mat = newMaterial(SPHERE_DIFF_COL[i], SPHERE_LITE_COL[i], SPHERE_LITE[i], SPHERE_SPEC_COL[i], SPHERE_SPEC[i], SPHERE_GLOSS[i]);
         Sphere sphere = newSphere(SPHERE_POS[i], SPHERE_RADIUS[i], mat);
 
@@ -275,7 +279,7 @@ float3 Trace(Ray r, inout uint rng) {
         rayColor *= lerp(mat.Color, mat.specularColor, isReflected).xyz; // FIXME: does not keep track of alpha channel
         
         /* Randomize the direction of the next bounce. */
-        float3 dirDiffuse  = normalize(hit.Normal + Random(rng));
+        float3 dirDiffuse  = normalize(hit.Normal + Random(rng)); // cosine-weighted distribution (points further from normal will contribute less light)
         float3 dirSpecular = reflect(r.Direction, hit.Normal);
         
         r.Origin = hit.Point;
@@ -288,8 +292,8 @@ float3 Trace(Ray r, inout uint rng) {
 float4 FS_Main(FS_Input input) : COLOR0 {
 	
     float4 color = tex2D(TextureSampler, input.TextureCoord);
-	
-    /* pixel coordinates as a percentange of the screen, from 0 to 1 on each axis */
+    
+    /* pixel coordinates as a percentage of the screen, from 0 to 1 on each axis */
     float2 uv = input.TextureCoord.xy;
 	
     /* Calculate the Position for a given Point in the Viewport */
@@ -300,10 +304,11 @@ float4 FS_Main(FS_Input input) : COLOR0 {
     Ray r = _ray(_cameraPosition, Point);
     
     /* Create RNG Seed */
-    uint2 numPixels = uint2(_screenX, _screenY); // FIXME: HARD-CODED VALUE
-    uint2 pixelCoord = uv * numPixels;
-    uint pixelIdx = pixelCoord.y * numPixels.x + pixelCoord.x;
-    uint rng = pixelIdx + _frame * 719393;
+    uint2 pixelCoord = uv * uint2(_screenX, _screenY);
+    uint pixelIdx = pixelCoord.y * _screenX + pixelCoord.x;
+    uint rng = (pixelIdx + _frame * 2654435761u + 1692572869u);
+    rng = rng ^ (rng >> 18);
+    lcg_xs_24(rng); // introduce more randomness with additional iteration of LCG-XS
     
     // Trace Pixel Color
     float3 totalPixelColor = float3(0, 0, 0);
