@@ -9,12 +9,12 @@ Please feel free to play around with them!
 Run `PathTracer.WindowsDX` to run all code from `PathTracer.Core` in a Windows platform
 (`PathTracer.DesktopGL` is a WIP and currently not supported)
 
-### Controls
+## Controls
 **Left Mouse Button:** Use the GUI
 **Right Mouse Button:** Press to rotate an arcball camera around the scene.
 **Middle Mouse Wheel:** Press to translate an arcball camera along the Z-axis.
 
-### GUI
+## GUI
 **Scene Material Editor:** change material properties of any object in the scene
 **Render Settings:** toggle between rendering techniques and change the parameters of the ray tracing kernel
 **Profiler:** check out the program's performance as render settings change or you update the scene

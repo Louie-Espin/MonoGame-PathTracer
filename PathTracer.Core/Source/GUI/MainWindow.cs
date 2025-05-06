@@ -9,19 +9,21 @@ namespace PathTracer.Core.Source.GUI;
 
 public class MainWindow {
 
-	const ImGuiWindowFlags flags = ImGuiWindowFlags.NoMove;
+	const ImGuiWindowFlags flags = ImGuiWindowFlags.None;
 	static ImGuiRenderer GuiRenderer;
 
 	/* GUI WINDOW DATA */
 	bool _toggleGUI = true;
-	private readonly NumVector2 _windowSize;
+	private readonly (float width, float height, int x, int y) _window;
 	
 	public MainWindow(Game game, GraphicsDevice graphics) {
 		/* Initialize Imgui Renderer */
 		GuiRenderer = new ImGuiRenderer(game);
-		_windowSize = new NumVector2(
-			x: (graphics.Viewport.Width  * .25f),
-			y: (graphics.Viewport.Height * .75f)
+		_window = (
+			width: (graphics.Viewport.Width  * .24f),
+			height: (graphics.Viewport.Height * .95f),
+			x: graphics.Viewport.Bounds.Top + 10,
+			y: graphics.Viewport.Bounds.Left + 10
 		);
 
 		SetTheme();
@@ -59,7 +61,9 @@ public class MainWindow {
 		if (!_toggleGUI) return;
 
 		GuiRenderer.BeginLayout(gameTime);
-		// ImGui.SetNextWindowSize(_windowSize);
+		ImGui.SetNextWindowSize(new (_window.width, _window.height), ImGuiCond.Once);
+		ImGui.SetNextWindowPos(new (_window.x, _window.y), ImGuiCond.Once);
+		ImGui.SetNextItemOpen(true, ImGuiCond.Once);
 		ImGui.Begin("Path Tracer Settings", flags);		
 	}
 

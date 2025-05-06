@@ -182,9 +182,8 @@ Hit IntersectSphere(Ray R, Sphere S) {
  */
 float4 Accumulate(float4 colorCurr, float4 colorPrev, int accumulated, bool weighted) {
     if (accumulated == 0) return colorCurr;
-    
     float a = (weighted) ? (1.0 / (accumulated + 1)) : 0.2f;
-    return saturate((a) * colorCurr + (1-a) * colorPrev);
+    return saturate(lerp(colorCurr, colorPrev, 1 - a));
 }
 
 /* ################################################################################################################################
